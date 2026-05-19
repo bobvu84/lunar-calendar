@@ -236,10 +236,10 @@ export function buildCalendarMonth(year: number, month: number): CalendarDay[] {
     let displayLabel = lunar.lunarDayStr;
     let labelType: CalendarDay['labelType'] = 'lunar';
 
-    // if (lunar.isFirstDayOfMonth) {
-    //   displayLabel = lunar.lunarMonthShort;
-    //   labelType = 'leapMonth';
-    // }
+    if (lunar.isFirstDayOfMonth) {
+      displayLabel = lunar.lunarMonthShort;
+      labelType = 'leapMonth';
+    }
 
     days.push({ date: d, solarDay: dy, solarMonth: m, solarYear: y, isCurrentMonth, isToday, lunar, displayLabel, labelType });
   }
