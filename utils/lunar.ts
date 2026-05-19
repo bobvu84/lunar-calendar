@@ -232,13 +232,19 @@ export function buildCalendarMonth(year: number, month: number): CalendarDay[] {
 
     const lunar = getLunarInfo(y, m, dy);
 
-    // Priority: solar festival > solar term > lunar festival > month start > day
-    let displayLabel = lunar.lunarDayStr;
+    const absMonth = Math.abs(lunar.lunarMonth);
+    const absDay   = Math.abs(lunar.lunarDay);
+
+    let displayLabel: string;
     let labelType: CalendarDay['labelType'] = 'lunar';
 
-    if (lunar.isFirstDayOfMonth) {
-      displayLabel = `1/${Math.abs(lunar.lunarMonth)}`;
+    if (lunar.isFirstDayOfMonth && absMonth !== 1) {
+      displayLabel = `1/${absMonth}`;
       labelType = 'leapMonth';
+    } else if (absMonth === 1) {
+      displayLabel = lunar.lunarDayStr; // Mùng 1…Mùng 10, Rằm, 11…30
+    } else {
+      displayLabel = String(absDay);
     }
 
     days.push({ date: d, solarDay: dy, solarMonth: m, solarYear: y, isCurrentMonth, isToday, lunar, displayLabel, labelType });
