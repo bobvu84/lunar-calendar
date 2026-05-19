@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Solar day (large) -->
+    <TextView
+        android:id="@+id/widget_solar_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textColor="#FFFFFF"
+        android:textSize="52sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-condensed"
+        android:lineSpacingExtra="-4dp" />
+
+    <!-- Lunar date -->
+    <TextView
+        android:id="@+id/widget_lunar_full"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="正月初一"
+        android:textColor="#DDFFFFFF"
+        android:textSize="14sp"
+        android:textStyle="normal"
+        android:layout_marginTop="2dp" />
+
+    <!-- Ganzhi + zodiac -->
+    <TextView
+        android:id="@+id/widget_ganzhi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="甲辰年 · 龙年"
+        android:textColor="#99FFFFFF"
+        android:textSize="11sp"
+        android:layout_marginTop="2dp" />
+
+    <!-- Festival / solar term (hidden when empty) -->
+    <TextView
+        android:id="@+id/widget_festival"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#F39C12"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:background="@drawable/festival_badge_bg"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:layout_marginTop="6dp"
+        android:visibility="gone" />
+
+</LinearLayout>
