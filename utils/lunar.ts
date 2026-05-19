@@ -237,7 +237,7 @@ export function buildCalendarMonth(year: number, month: number): CalendarDay[] {
     let labelType: CalendarDay['labelType'] = 'lunar';
 
     if (lunar.isFirstDayOfMonth) {
-      displayLabel = lunar.lunarMonthShort;
+      displayLabel = `1/${Math.abs(lunar.lunarMonth)}`;
       labelType = 'leapMonth';
     }
 
