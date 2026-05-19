@@ -109,6 +109,7 @@ const FESTIVALS_VI: Record<string, string> = {
   '护士节':'Ngày Y Tá',       '植树节': 'Ngày Trồng Cây',
   '地球日':'Ngày Trái Đất',   '五四运动':'Ngày Thanh Niên',
   '消费者权益日': 'Quyền Người Tiêu Dùng',
+  '青年节': 'Ngày Thanh Niên', '光棍节': 'Ngày Độc Thân',
 };
 
 // ─── Translation helpers ─────────────────────────────────────────────────────
@@ -121,7 +122,11 @@ function translateGanZhi(cn: string): string {
 }
 
 function translateFestivals(list: string[]): string[] {
-  return list.map(f => FESTIVALS_VI[f] ?? f);
+  return list.map(f => {
+    if (FESTIVALS_VI[f]) return FESTIVALS_VI[f];
+    const key = Object.keys(FESTIVALS_VI).find(k => f.startsWith(k));
+    return key ? FESTIVALS_VI[key] : f;
+  });
 }
 
 function translateSolarTerms(list: string[]): string[] {
