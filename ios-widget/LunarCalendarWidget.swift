@@ -91,11 +91,11 @@ struct SmallWidgetView: View {
             )
 
             VStack(spacing: 2) {
-                Text("\(entry.lunarData.solarDay)")
-                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                Text(String(format: "%02d/%02d", entry.lunarData.solarDay, entry.lunarData.solarMonth))
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.6)
 
                 Text(entry.lunarData.lunarDay + " " + entry.lunarData.lunarMonth)
                     .font(.system(size: 13, weight: .medium))
