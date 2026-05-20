@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lunar.calendar",
+      "bundleIdentifier": "com.bobvu84.lunar.calendar",
       "infoPlist": {
         "NSAppGroupsEntitlements": ["group.com.lunar.calendar.widget"]
       },

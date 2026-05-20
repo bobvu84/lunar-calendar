@@ -232,12 +232,14 @@ struct LunarCalendarWidget: Widget {
 
 // MARK: - Xcode Previews
 
+@available(iOS 17.0, *)
 #Preview("Small", as: .systemSmall) {
     LunarCalendarWidget()
 } timeline: {
     LunarEntry(date: .now, lunarData: .placeholder)
 }
 
+@available(iOS 17.0, *)
 #Preview("Medium", as: .systemMedium) {
     LunarCalendarWidget()
 } timeline: {

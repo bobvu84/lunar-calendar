@@ -46,7 +46,7 @@ function withIOSWidgetExtension(config) {
     }
 
     const plistSrc = path.join(projectRoot, 'ios-widget', 'Info.plist');
-    const plistDst = path.join(widgetDir, 'Info.plist');
+    const plistDst = path.join(widgetDir, `${WIDGET_TARGET}-Info.plist`);
     if (fs.existsSync(plistSrc)) {
       fs.copyFileSync(plistSrc, plistDst);
     }
