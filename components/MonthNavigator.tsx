@@ -46,14 +46,16 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.sm,
     backgroundColor: Colors.surface,
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.divider,
   },
   lunarBadge: {
-    backgroundColor: Colors.surfaceElevated,
+    backgroundColor: 'rgba(245,200,66,0.1)',
     paddingHorizontal: Spacing.sm,
     paddingVertical: 3,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.primaryLight,
+    borderColor: 'rgba(245,200,66,0.35)',
     marginBottom: Spacing.sm,
   },
   lunarYear: {

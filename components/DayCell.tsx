@@ -17,7 +17,7 @@ export default function DayCell({ day, onPress, isSelected, columnIndex }: Props
   const solarColor = day.isToday
     ? Colors.textOnPrimary
     : isSelected
-    ? Colors.textOnPrimary
+    ? Colors.text
     : isDisabled
     ? Colors.textMuted
     : isWeekend
@@ -26,19 +26,21 @@ export default function DayCell({ day, onPress, isSelected, columnIndex }: Props
 
   const labelColor =
     day.labelType === 'festival' || day.labelType === 'leapMonth'
-      ? day.isToday || isSelected
-        ? 'rgba(255,255,255,0.85)'
+      ? day.isToday
+        ? 'rgba(10,15,30,0.7)'
+        : isSelected
+        ? Colors.primaryLight
         : isDisabled
         ? Colors.textMuted
         : Colors.festivalText
       : day.labelType === 'solarTerm'
-      ? day.isToday || isSelected
-        ? 'rgba(255,255,255,0.85)'
+      ? day.isToday
+        ? 'rgba(10,15,30,0.7)'
         : isDisabled
         ? Colors.textMuted
         : Colors.solarTermText
-      : day.isToday || isSelected
-      ? 'rgba(255,255,255,0.75)'
+      : day.isToday
+      ? 'rgba(10,15,30,0.6)'
       : isDisabled
       ? Colors.textMuted
       : Colors.textSecondary;
@@ -80,12 +82,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.today,
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
     elevation: 4,
   },
   selectedCell: {
     backgroundColor: Colors.selected,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   solarText: {
     fontSize: 17,

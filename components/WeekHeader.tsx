@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
   },
   cell: {
     flex: 1,
