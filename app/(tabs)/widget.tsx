@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform, Linking } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, AppColors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getTodayLunarInfo } from '@/utils/lunar';
 
-function WidgetPreview() {
+function WidgetPreview({ styles, Colors }: { styles: ReturnType<typeof makeStyles>; Colors: AppColors }) {
   const today = new Date();
   const lunar = getTodayLunarInfo();
   const festivals = [...(lunar.festivals ?? []), ...(lunar.solarFestivals ?? [])];
@@ -14,18 +15,18 @@ function WidgetPreview() {
     <View style={styles.previewContainer}>
       <Text style={styles.previewTitle}>Widget Preview</Text>
 
-      {/* Small widget */}
-      <View style={styles.row}>
+      <View style={styles.previewRow}>
         <View>
           <Text style={styles.previewSizeLabel}>Small</Text>
           <View style={styles.widgetSmall}>
-            <Text style={styles.widgetSmallDay}>{today.getDate()}</Text>
+            <Text style={styles.widgetSmallDay}>
+              {String(today.getDate()).padStart(2, '0')}/{String(today.getMonth() + 1).padStart(2, '0')}
+            </Text>
             <Text style={styles.widgetSmallLunar}>{lunar.lunarDayStr}</Text>
             <Text style={styles.widgetSmallGanzhi}>Năm {lunar.ganZhiYear}</Text>
           </View>
         </View>
 
-        {/* Medium widget */}
         <View>
           <Text style={styles.previewSizeLabel}>Medium</Text>
           <View style={styles.widgetMedium}>
@@ -48,7 +49,7 @@ function WidgetPreview() {
   );
 }
 
-function StepCard({ step, title, body }: { step: string; title: string; body: string }) {
+function StepCard({ step, title, body, styles }: { step: string; title: string; body: string; styles: ReturnType<typeof makeStyles> }) {
   return (
     <View style={styles.stepCard}>
       <View style={styles.stepBadge}>
@@ -63,8 +64,8 @@ function StepCard({ step, title, body }: { step: string; title: string; body: st
 }
 
 export default function WidgetScreen() {
-  const isIOS = Platform.OS === 'ios';
-  const isAndroid = Platform.OS === 'android';
+  const { Colors, isDark, toggleTheme } = useTheme();
+  const styles = useMemo(() => makeStyles(Colors), [Colors]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -74,64 +75,46 @@ export default function WidgetScreen() {
           <Text style={styles.headerSub}>Thêm Lịch Âm Dương vào màn hình chính</Text>
         </View>
 
-        <WidgetPreview />
+        {/* Theme toggle */}
+        <View style={styles.themeCard}>
+          <View style={styles.themeCardLeft}>
+            <Text style={styles.themeIcon}>{isDark ? '🌙' : '☀️'}</Text>
+            <View>
+              <Text style={styles.themeLabel}>Giao diện</Text>
+              <Text style={styles.themeValue}>{isDark ? 'Tối (Dark)' : 'Sáng (Light)'}</Text>
+            </View>
+          </View>
+          <Switch
+            value={isDark}
+            onValueChange={toggleTheme}
+            trackColor={{ false: '#E5E7EB', true: Colors.primary }}
+            thumbColor={isDark ? Colors.textOnPrimary : '#ffffff'}
+            ios_backgroundColor="#E5E7EB"
+          />
+        </View>
 
-        {/* iOS instructions */}
+        <WidgetPreview styles={styles} Colors={Colors} />
+
         <View style={styles.section}>
           <View style={styles.platformBadge}>
             <Text style={styles.platformBadgeText}>🍎 iOS</Text>
           </View>
           <Text style={styles.sectionTitle}>Setup Instructions</Text>
-
-          <StepCard
-            step="1"
-            title="Build with Xcode"
-            body="Run 'expo prebuild' to generate the native iOS project, then open /ios/LunarCalendar.xcworkspace in Xcode."
-          />
-          <StepCard
-            step="2"
-            title="Widget Extension is included"
-            body="The LunarCalendarWidget target is already configured. It reads shared data from the app group 'group.com.lunar.calendar.widget'."
-          />
-          <StepCard
-            step="3"
-            title="Build & install on device"
-            body="Select the LunarCalendar scheme in Xcode, choose your device, and press Run. Both the app and widget extension will install."
-          />
-          <StepCard
-            step="4"
-            title="Add to Home Screen"
-            body="Long-press your home screen → tap '+' → search 'Lunar Calendar' → choose Small or Medium size → tap Add Widget."
-          />
+          <StepCard step="1" title="Build with Xcode" body="Run 'expo prebuild' to generate the native iOS project, then open /ios/LunarCalendar.xcworkspace in Xcode." styles={styles} />
+          <StepCard step="2" title="Widget Extension is included" body="The LunarCalendarWidget target is already configured. It reads shared data from the app group 'group.com.lunar.calendar.widget'." styles={styles} />
+          <StepCard step="3" title="Build & install on device" body="Select the LunarCalendar scheme in Xcode, choose your device, and press Run." styles={styles} />
+          <StepCard step="4" title="Add to Home Screen" body="Long-press your home screen → tap '+' → search 'Lunar Calendar' → choose Small or Medium size → tap Add Widget." styles={styles} />
         </View>
 
-        {/* Android instructions */}
         <View style={styles.section}>
           <View style={[styles.platformBadge, styles.androidBadge]}>
             <Text style={styles.platformBadgeText}>🤖 Android</Text>
           </View>
           <Text style={styles.sectionTitle}>Setup Instructions</Text>
-
-          <StepCard
-            step="1"
-            title="Build with Android Studio"
-            body="Run 'expo prebuild' to generate the native Android project, then open /android in Android Studio."
-          />
-          <StepCard
-            step="2"
-            title="Widget provider is included"
-            body="LunarCalendarWidget.kt and widget layouts are in android/app/src/main/. The widget reads SharedPreferences written by the app."
-          />
-          <StepCard
-            step="3"
-            title="Build & install"
-            body="Click Run in Android Studio to install. The app will automatically register the widget with the launcher."
-          />
-          <StepCard
-            step="4"
-            title="Add to Home Screen"
-            body="Long-press home screen → Widgets → find Lunar Calendar → drag to home screen."
-          />
+          <StepCard step="1" title="Build with Android Studio" body="Run 'expo prebuild' to generate the native Android project, then open /android in Android Studio." styles={styles} />
+          <StepCard step="2" title="Widget provider is included" body="LunarCalendarWidgetProvider.kt reads SharedPreferences written by the app." styles={styles} />
+          <StepCard step="3" title="Build & install" body="Click Run in Android Studio to install on your device." styles={styles} />
+          <StepCard step="4" title="Add to Home Screen" body="Long-press home screen → Widgets → find Lunar Calendar → drag to home screen." styles={styles} />
         </View>
 
         <View style={styles.bottomPad} />
@@ -140,7 +123,7 @@ export default function WidgetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (Colors: AppColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   scroll: { flex: 1 },
   header: {
@@ -158,6 +141,37 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 4,
   },
+  themeCard: {
+    marginHorizontal: Spacing.md,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  themeCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  themeIcon: {
+    fontSize: 28,
+  },
+  themeLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  themeValue: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
   previewContainer: {
     margin: Spacing.md,
     padding: Spacing.md,
@@ -174,7 +188,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: Spacing.md,
   },
-  row: {
+  previewRow: {
     flexDirection: 'row',
     gap: Spacing.md,
     alignItems: 'flex-start',
@@ -195,15 +209,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 8,
   },
-  widgetSmallDay: { fontSize: 48, fontWeight: '700', color: Colors.primary, lineHeight: 52 },
-  widgetSmallLunar: { fontSize: 14, color: Colors.text, fontWeight: '500' },
-  widgetSmallGanzhi: { fontSize: 11, color: Colors.textSecondary, marginTop: 2 },
+  widgetSmallDay: { fontSize: 36, fontWeight: '700', color: Colors.primary, lineHeight: 40 },
+  widgetSmallLunar: { fontSize: 13, color: Colors.text, fontWeight: '500' },
+  widgetSmallGanzhi: { fontSize: 10, color: Colors.textSecondary, marginTop: 2 },
   widgetMedium: {
     width: 270,
     height: 130,
@@ -215,11 +224,6 @@ const styles = StyleSheet.create({
     gap: 16,
     borderWidth: 1,
     borderColor: Colors.border,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 8,
   },
   widgetMediumLeft: { alignItems: 'center', minWidth: 60 },
   widgetMedDay: { fontSize: 48, fontWeight: '700', color: Colors.primary, lineHeight: 52 },
@@ -233,12 +237,12 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
     marginTop: 4,
-    backgroundColor: 'rgba(245,200,66,0.12)',
+    backgroundColor: Colors.surfaceElevated,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(245,200,66,0.3)',
+    borderColor: Colors.border,
     alignSelf: 'flex-start',
   },
   section: {
@@ -246,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   platformBadge: {
-    backgroundColor: 'rgba(245,200,66,0.1)',
+    backgroundColor: Colors.surfaceElevated,
     borderRadius: 12,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
@@ -256,8 +260,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   androidBadge: {
-    backgroundColor: 'rgba(168,216,234,0.1)',
-    borderColor: 'rgba(168,216,234,0.3)',
+    borderColor: Colors.accent,
   },
   platformBadgeText: {
     fontSize: 13,

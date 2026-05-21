@@ -1,4 +1,4 @@
-export const Colors = {
+export const DarkColors = {
   primary: '#f5c842',
   primaryDark: '#e6b830',
   primaryLight: '#f9de85',
@@ -20,6 +20,34 @@ export const Colors = {
   border: 'rgba(245,200,66,0.2)',
   shadow: 'rgba(245,200,66,0.2)',
 };
+
+export const LightColors = {
+  primary: '#C0392B',
+  primaryDark: '#922B21',
+  primaryLight: '#F1948A',
+  accent: '#E67E22',
+  background: '#FDFCFB',
+  surface: '#FFFFFF',
+  surfaceElevated: '#FEF9F9',
+  text: '#1A1A2E',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
+  textOnPrimary: '#FFFFFF',
+  lunarText: '#C0392B',
+  solarTermText: '#E67E22',
+  festivalText: '#C0392B',
+  weekend: '#C0392B',
+  today: '#C0392B',
+  selected: '#922B21',
+  divider: '#E5E7EB',
+  border: '#F3F4F6',
+  shadow: 'rgba(192,57,43,0.15)',
+};
+
+export type AppColors = typeof DarkColors;
+
+// Default export for non-component usage
+export const Colors = DarkColors;
 
 export const Typography = {
   solarDay: { fontSize: 18, fontWeight: '600' as const },

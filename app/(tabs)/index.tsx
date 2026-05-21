@@ -1,14 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MonthNavigator from '@/components/MonthNavigator';
 import WeekHeader from '@/components/WeekHeader';
 import CalendarGrid from '@/components/CalendarGrid';
 import DayDetailModal from '@/components/DayDetailModal';
 import { CalendarDay } from '@/utils/lunar';
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function CalendarScreen() {
+  const { Colors } = useTheme();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -42,8 +43,8 @@ export default function CalendarScreen() {
     : null;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }} edges={['top']}>
+      <View style={{ flex: 1, backgroundColor: Colors.background }}>
         <MonthNavigator
           year={year}
           month={month}
@@ -52,35 +53,14 @@ export default function CalendarScreen() {
           onToday={handleToday}
         />
         <WeekHeader />
-        <ScrollView
-          style={styles.scroll}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-          <CalendarGrid
-            year={year}
-            month={month}
-            selectedDate={selectedDate}
-            onDayPress={handleDayPress}
-          />
-        </ScrollView>
+        <CalendarGrid
+          year={year}
+          month={month}
+          selectedDate={selectedDate}
+          onDayPress={handleDayPress}
+        />
       </View>
-
       <DayDetailModal day={selectedDay} onClose={() => setSelectedDay(null)} />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scroll: {
-    flex: 1,
-  },
-});

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, AppColors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { CalendarDay } from '@/utils/lunar';
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 const SOLAR_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
-function InfoRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function InfoRow({ label, value, highlight, styles }: { label: string; value: string; highlight?: boolean; styles: ReturnType<typeof makeStyles> }) {
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -29,6 +30,9 @@ function InfoRow({ label, value, highlight }: { label: string; value: string; hi
 }
 
 export default function DayDetailModal({ day, onClose }: Props) {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => makeStyles(Colors), [Colors]);
+
   if (!day) return null;
 
   const { lunar } = day;
@@ -41,7 +45,6 @@ export default function DayDetailModal({ day, onClose }: Props) {
       </TouchableWithoutFeedback>
 
       <View style={styles.sheet}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.handle} />
           <View style={styles.headerContent}>
@@ -63,29 +66,26 @@ export default function DayDetailModal({ day, onClose }: Props) {
         </View>
 
         <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-          {/* Solar Section */}
           <Text style={styles.sectionTitle}>Dương Lịch · Solar</Text>
           <View style={styles.card}>
-            <InfoRow label="Năm" value={`${day.solarYear}`} />
-            <InfoRow label="Tháng" value={`Tháng ${day.solarMonth} (${SOLAR_MONTHS[day.solarMonth - 1]})`} />
-            <InfoRow label="Ngày" value={`Ngày ${day.solarDay}`} />
+            <InfoRow label="Năm" value={`${day.solarYear}`} styles={styles} />
+            <InfoRow label="Tháng" value={`Tháng ${day.solarMonth} (${SOLAR_MONTHS[day.solarMonth - 1]})`} styles={styles} />
+            <InfoRow label="Ngày" value={`Ngày ${day.solarDay}`} styles={styles} />
             {lunar.solarFestivals.length > 0 && (
-              <InfoRow label="Lễ" value={lunar.solarFestivals.join(', ')} highlight />
+              <InfoRow label="Lễ" value={lunar.solarFestivals.join(', ')} highlight styles={styles} />
             )}
           </View>
 
-          {/* Lunar Section */}
           <Text style={styles.sectionTitle}>Âm Lịch · Lunar</Text>
           <View style={styles.card}>
-            <InfoRow label="Năm Can Chi" value={`Năm ${lunar.ganZhiYear} (${lunar.zodiac})`} />
-            <InfoRow label="Tháng Âm Lịch" value={lunar.lunarMonthStr} />
-            <InfoRow label="Ngày Âm Lịch" value={lunar.lunarDayStr} />
-            <InfoRow label="Tháng Can Chi" value={lunar.ganZhiMonth} />
-            <InfoRow label="Ngày Can Chi" value={lunar.ganZhiDay} />
-            {lunar.isLeapMonth && <InfoRow label="Tháng Nhuận" value="Có" highlight />}
+            <InfoRow label="Năm Can Chi" value={`Năm ${lunar.ganZhiYear} (${lunar.zodiac})`} styles={styles} />
+            <InfoRow label="Tháng Âm Lịch" value={lunar.lunarMonthStr} styles={styles} />
+            <InfoRow label="Ngày Âm Lịch" value={lunar.lunarDayStr} styles={styles} />
+            <InfoRow label="Tháng Can Chi" value={lunar.ganZhiMonth} styles={styles} />
+            <InfoRow label="Ngày Can Chi" value={lunar.ganZhiDay} styles={styles} />
+            {lunar.isLeapMonth && <InfoRow label="Tháng Nhuận" value="Có" highlight styles={styles} />}
           </View>
 
-          {/* Festivals */}
           {allFestivals.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>Lễ Hội · Festivals</Text>
@@ -100,7 +100,6 @@ export default function DayDetailModal({ day, onClose }: Props) {
             </>
           )}
 
-          {/* Solar Terms */}
           {lunar.solarTerms.length > 0 && (
             <>
               <Text style={styles.sectionTitle}>Tiết Khí · Solar Terms</Text>
@@ -122,7 +121,7 @@ export default function DayDetailModal({ day, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (Colors: AppColors) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',

@@ -1,16 +1,20 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '@/constants/theme';
+import React, { useMemo } from 'react';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Spacing, AppColors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { CalendarDay } from '@/utils/lunar';
 
 interface Props {
   day: CalendarDay;
   onPress: (day: CalendarDay) => void;
   isSelected: boolean;
-  columnIndex: number; // 0=Sun, 6=Sat
+  columnIndex: number;
 }
 
 export default function DayCell({ day, onPress, isSelected, columnIndex }: Props) {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => makeStyles(Colors), [Colors]);
+
   const isWeekend = columnIndex === 0 || columnIndex === 6;
   const isDisabled = !day.isCurrentMonth;
 
@@ -27,7 +31,7 @@ export default function DayCell({ day, onPress, isSelected, columnIndex }: Props
   const labelColor =
     day.labelType === 'festival' || day.labelType === 'leapMonth'
       ? day.isToday
-        ? 'rgba(10,15,30,0.7)'
+        ? Colors.textOnPrimary
         : isSelected
         ? Colors.primaryLight
         : isDisabled
@@ -35,12 +39,12 @@ export default function DayCell({ day, onPress, isSelected, columnIndex }: Props
         : Colors.festivalText
       : day.labelType === 'solarTerm'
       ? day.isToday
-        ? 'rgba(10,15,30,0.7)'
+        ? Colors.textOnPrimary
         : isDisabled
         ? Colors.textMuted
         : Colors.solarTermText
       : day.isToday
-      ? 'rgba(10,15,30,0.6)'
+      ? Colors.textOnPrimary
       : isDisabled
       ? Colors.textMuted
       : Colors.textSecondary;
@@ -67,7 +71,7 @@ export default function DayCell({ day, onPress, isSelected, columnIndex }: Props
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (Colors: AppColors) => StyleSheet.create({
   cell: {
     flex: 1,
     aspectRatio: 0.72,

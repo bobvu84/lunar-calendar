@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, AppColors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const DAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
 export default function WeekHeader() {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => makeStyles(Colors), [Colors]);
+
   return (
     <View style={styles.row}>
       {DAYS.map((d, i) => (
@@ -16,7 +20,7 @@ export default function WeekHeader() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (Colors: AppColors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     paddingHorizontal: Spacing.sm,

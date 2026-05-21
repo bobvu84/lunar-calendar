@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, Typography, Spacing } from '@/constants/theme';
+import { Typography, Spacing, AppColors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { formatMonthYear, getTodayLunarInfo } from '@/utils/lunar';
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export default function MonthNavigator({ year, month, onPrev, onNext, onToday }: Props) {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => makeStyles(Colors), [Colors]);
   const lunar = getTodayLunarInfo();
   const isCurrentMonth = year === new Date().getFullYear() && month === new Date().getMonth() + 1;
 
@@ -39,7 +42,7 @@ export default function MonthNavigator({ year, month, onPrev, onNext, onToday }:
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (Colors: AppColors) => StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
@@ -50,12 +53,12 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.divider,
   },
   lunarBadge: {
-    backgroundColor: 'rgba(245,200,66,0.1)',
+    backgroundColor: Colors.surfaceElevated,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 3,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(245,200,66,0.35)',
+    borderColor: Colors.border,
     marginBottom: Spacing.sm,
   },
   lunarYear: {

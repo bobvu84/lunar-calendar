@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing, AppColors } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { getTodayLunarInfo } from '@/utils/lunar';
 
 const SOLAR_MONTHS = [
@@ -13,7 +14,7 @@ const SOLAR_MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 const WEEK_DAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
-function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
+function InfoCard({ title, children, styles }: { title: string; children: React.ReactNode; styles: ReturnType<typeof makeStyles> }) {
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
@@ -22,7 +23,7 @@ function InfoCard({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function Row({ label, value, highlight, styles }: { label: string; value: string; highlight?: boolean; styles: ReturnType<typeof makeStyles> }) {
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
@@ -32,6 +33,8 @@ function Row({ label, value, highlight }: { label: string; value: string; highli
 }
 
 export default function TodayScreen() {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => makeStyles(Colors), [Colors]);
   const today = new Date();
   const lunar = useMemo(() => getTodayLunarInfo(), []);
 
@@ -40,7 +43,6 @@ export default function TodayScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Hero card */}
         <View style={styles.hero}>
           <Text style={styles.heroWeekday}>{WEEK_DAYS[today.getDay()]}</Text>
           <Text style={styles.heroDay}>{today.getDate()}</Text>
@@ -75,35 +77,35 @@ export default function TodayScreen() {
         </View>
 
         <View style={styles.content}>
-          <InfoCard title="Dương Lịch · Solar Calendar">
-            <Row label="Năm" value={`${today.getFullYear()}`} />
-            <Row label="Tháng" value={`${SOLAR_MONTHS[today.getMonth()]} (${SOLAR_MONTHS_EN[today.getMonth()]})`} />
-            <Row label="Ngày" value={`${today.getDate()}`} />
-            <Row label="Thứ" value={WEEK_DAYS[today.getDay()]} />
+          <InfoCard title="Dương Lịch · Solar Calendar" styles={styles}>
+            <Row label="Năm" value={`${today.getFullYear()}`} styles={styles} />
+            <Row label="Tháng" value={`${SOLAR_MONTHS[today.getMonth()]} (${SOLAR_MONTHS_EN[today.getMonth()]})`} styles={styles} />
+            <Row label="Ngày" value={`${today.getDate()}`} styles={styles} />
+            <Row label="Thứ" value={WEEK_DAYS[today.getDay()]} styles={styles} />
           </InfoCard>
 
-          <InfoCard title="Âm Lịch · Lunar Calendar">
-            <Row label="Năm Can Chi" value={`Năm ${lunar.ganZhiYear}`} highlight />
-            <Row label="Con Giáp" value={lunar.zodiac} />
-            <Row label="Tháng Âm Lịch" value={lunar.lunarMonthStr} />
-            <Row label="Ngày Âm Lịch" value={lunar.lunarDayStr} />
-            <Row label="Tháng Can Chi" value={lunar.ganZhiMonth} />
-            <Row label="Ngày Can Chi" value={lunar.ganZhiDay} />
-            {lunar.isLeapMonth && <Row label="Tháng Nhuận" value="Có" highlight />}
+          <InfoCard title="Âm Lịch · Lunar Calendar" styles={styles}>
+            <Row label="Năm Can Chi" value={`Năm ${lunar.ganZhiYear}`} highlight styles={styles} />
+            <Row label="Con Giáp" value={lunar.zodiac} styles={styles} />
+            <Row label="Tháng Âm Lịch" value={lunar.lunarMonthStr} styles={styles} />
+            <Row label="Ngày Âm Lịch" value={lunar.lunarDayStr} styles={styles} />
+            <Row label="Tháng Can Chi" value={lunar.ganZhiMonth} styles={styles} />
+            <Row label="Ngày Can Chi" value={lunar.ganZhiDay} styles={styles} />
+            {lunar.isLeapMonth && <Row label="Tháng Nhuận" value="Có" highlight styles={styles} />}
           </InfoCard>
 
           {allFestivals.length > 0 && (
-            <InfoCard title="Lễ Hội · Festivals">
+            <InfoCard title="Lễ Hội · Festivals" styles={styles}>
               {allFestivals.map((f, i) => (
-                <Row key={i} label={`Lễ ${i + 1}`} value={f} highlight />
+                <Row key={i} label={`Lễ ${i + 1}`} value={f} highlight styles={styles} />
               ))}
             </InfoCard>
           )}
 
           {lunar.solarTerms.length > 0 && (
-            <InfoCard title="Tiết Khí · Solar Terms">
+            <InfoCard title="Tiết Khí · Solar Terms" styles={styles}>
               {lunar.solarTerms.map((t, i) => (
-                <Row key={i} label="Tiết Khí" value={t} />
+                <Row key={i} label="Tiết Khí" value={t} styles={styles} />
               ))}
             </InfoCard>
           )}
@@ -113,7 +115,7 @@ export default function TodayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (Colors: AppColors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -173,12 +175,12 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   festivalChip: {
-    backgroundColor: 'rgba(245,200,66,0.12)',
+    backgroundColor: Colors.surfaceElevated,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 5,
     borderWidth: 1,
-    borderColor: 'rgba(245,200,66,0.4)',
+    borderColor: Colors.border,
   },
   festivalChipText: {
     color: Colors.primary,
@@ -186,8 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   solarTermChip: {
-    backgroundColor: 'rgba(168,216,234,0.12)',
-    borderColor: 'rgba(168,216,234,0.4)',
+    borderColor: Colors.accent,
   },
   solarTermChipText: {
     color: Colors.accent,
@@ -203,7 +204,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     overflow: 'hidden',
-    marginBottom: 0,
   },
   cardTitle: {
     fontSize: 13,
