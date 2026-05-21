@@ -28,5 +28,17 @@ class WidgetSyncModule: NSObject {
   }
 
   @objc
+  func setTheme(_ theme: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    if let defaults = UserDefaults(suiteName: appGroupID) {
+      defaults.set(theme, forKey: "widgetTheme")
+      defaults.synchronize()
+    }
+    if #available(iOS 14.0, *) {
+      WidgetCenter.shared.reloadAllTimelines()
+    }
+    resolve(nil)
+  }
+
+  @objc
   static func requiresMainQueueSetup() -> Bool { false }
 }

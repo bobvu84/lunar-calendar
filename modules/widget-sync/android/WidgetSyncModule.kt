@@ -30,6 +30,19 @@ class WidgetSyncModule(reactContext: ReactApplicationContext) :
         promise.resolve(null)
     }
 
+    @ReactMethod
+    fun setTheme(theme: String, promise: Promise) {
+        try {
+            val prefs = reactApplicationContext
+                .getSharedPreferences("lunar_widget_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putString("widgetTheme", theme).apply()
+            triggerWidgetUpdate()
+            promise.resolve(null)
+        } catch (e: Exception) {
+            promise.reject("WIDGET_THEME_ERROR", e.message)
+        }
+    }
+
     private fun triggerWidgetUpdate() {
         val ctx = reactApplicationContext
         val manager = AppWidgetManager.getInstance(ctx)
