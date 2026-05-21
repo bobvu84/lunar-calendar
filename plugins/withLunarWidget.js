@@ -57,7 +57,7 @@ function withIOSWidgetExtension(config) {
     ['WidgetSyncModule.swift', 'WidgetSyncModule.m'].forEach((file) => {
       const fileSrc = path.join(nativeSrc, file);
       const fileDst = path.join(nativeDst, file);
-      if (fs.existsSync(fileSrc) && !fs.existsSync(fileDst)) {
+      if (fs.existsSync(fileSrc)) {
         fs.copyFileSync(fileSrc, fileDst);
       }
     });
