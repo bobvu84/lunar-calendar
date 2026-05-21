@@ -1,15 +1,38 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Spacing, AppColors } from '@/constants/theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getTodayLunarInfo } from '@/utils/lunar';
 
-function WidgetPreview({ styles, Colors }: { styles: ReturnType<typeof makeStyles>; Colors: AppColors }) {
+// Exact colors matching the native widget themes (WidgetTheme in LunarCalendarWidget.swift
+// and color values in LunarCalendarWidgetProvider.kt)
+const WIDGET_DARK = {
+  bg: '#111d36',          // midpoint of #1a2744 → #0a0f1e gradient
+  dayColor: '#f5c842',
+  lunarColor: 'rgba(255,255,255,0.9)',
+  ganZhiColor: 'rgba(255,255,255,0.55)',
+  festivalColor: '#f5c842',
+  festivalBg: 'rgba(245,200,66,0.15)',
+  divider: 'rgba(245,200,66,0.25)',
+};
+
+const WIDGET_LIGHT = {
+  bg: '#ab3127',          // midpoint of #C0392B → #922B21 gradient
+  dayColor: '#ffffff',
+  lunarColor: 'rgba(255,255,255,0.9)',
+  ganZhiColor: 'rgba(255,255,255,0.65)',
+  festivalColor: '#F39C12',
+  festivalBg: 'rgba(255,255,255,0.15)',
+  divider: 'rgba(255,255,255,0.25)',
+};
+
+function WidgetPreview({ isDark, styles, Colors }: { isDark: boolean; styles: ReturnType<typeof makeStyles>; Colors: AppColors }) {
   const today = new Date();
   const lunar = getTodayLunarInfo();
   const festivals = [...(lunar.festivals ?? []), ...(lunar.solarFestivals ?? [])];
-  const label = lunar.solarTerms[0] ?? festivals[0] ?? lunar.lunarDayStr;
+  const label = lunar.solarTerms[0] ?? festivals[0] ?? '';
+  const wt = isDark ? WIDGET_DARK : WIDGET_LIGHT;
 
   return (
     <View style={styles.previewContainer}>
@@ -18,29 +41,36 @@ function WidgetPreview({ styles, Colors }: { styles: ReturnType<typeof makeStyle
       <View style={styles.previewRow}>
         <View>
           <Text style={styles.previewSizeLabel}>Small</Text>
-          <View style={styles.widgetSmall}>
-            <Text style={styles.widgetSmallDay}>
+          <View style={[styles.widgetSmall, { backgroundColor: wt.bg }]}>
+            <Text style={[styles.widgetSmallDay, { color: wt.dayColor }]}>
               {String(today.getDate()).padStart(2, '0')}/{String(today.getMonth() + 1).padStart(2, '0')}
             </Text>
-            <Text style={styles.widgetSmallLunar}>{lunar.lunarDayStr}</Text>
-            <Text style={styles.widgetSmallGanzhi}>Năm {lunar.ganZhiYear}</Text>
+            <Text style={[styles.widgetSmallLunar, { color: wt.lunarColor }]}>{lunar.lunarDayStr} {lunar.lunarMonthShort}</Text>
+            <Text style={[styles.widgetSmallGanzhi, { color: wt.ganZhiColor }]}>Năm {lunar.ganZhiYear} · {lunar.zodiac}</Text>
+            {label ? (
+              <Text style={[styles.widgetSmallFestival, { color: wt.festivalColor, backgroundColor: wt.festivalBg }]}>{label}</Text>
+            ) : null}
           </View>
         </View>
 
         <View>
           <Text style={styles.previewSizeLabel}>Medium</Text>
-          <View style={styles.widgetMedium}>
+          <View style={[styles.widgetMedium, { backgroundColor: wt.bg }]}>
             <View style={styles.widgetMediumLeft}>
-              <Text style={styles.widgetMedDay}>{today.getDate()}</Text>
-              <Text style={styles.widgetMedMonth}>
+              <Text style={[styles.widgetMedDay, { color: wt.dayColor }]}>{today.getDate()}</Text>
+              <Text style={[styles.widgetMedMonth, { color: wt.lunarColor }]}>
                 {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()]}
               </Text>
+              <Text style={[styles.widgetMedYear, { color: wt.ganZhiColor }]}>{today.getFullYear()}</Text>
             </View>
+            <View style={[styles.widgetMedDivider, { backgroundColor: wt.divider }]} />
             <View style={styles.widgetMediumRight}>
-              <Text style={styles.widgetMedLunarDay}>{lunar.lunarDayStr} {lunar.lunarMonthShort}</Text>
-              <Text style={styles.widgetMedGanzhi}>Năm {lunar.ganZhiYear}</Text>
-              <Text style={styles.widgetMedZodiac}>{lunar.zodiac}</Text>
-              {label && <Text style={styles.widgetMedFestival}>{label}</Text>}
+              <Text style={[styles.widgetMedLunarDay, { color: wt.lunarColor }]}>{lunar.lunarDayStr} {lunar.lunarMonthShort}</Text>
+              <Text style={[styles.widgetMedGanzhi, { color: wt.lunarColor }]}>Năm {lunar.ganZhiYear}</Text>
+              <Text style={[styles.widgetMedZodiac, { color: wt.ganZhiColor }]}>{lunar.zodiac}</Text>
+              {label ? (
+                <Text style={[styles.widgetMedFestival, { color: wt.festivalColor, backgroundColor: wt.festivalBg }]}>{label}</Text>
+              ) : null}
             </View>
           </View>
         </View>
@@ -93,7 +123,7 @@ export default function WidgetScreen() {
           />
         </View>
 
-        <WidgetPreview styles={styles} Colors={Colors} />
+        <WidgetPreview isDark={isDark} styles={styles} Colors={Colors} />
 
         <View style={styles.section}>
           <View style={styles.platformBadge}>
@@ -203,46 +233,50 @@ const makeStyles = (Colors: AppColors) => StyleSheet.create({
   widgetSmall: {
     width: 130,
     height: 130,
-    backgroundColor: Colors.surfaceElevated,
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
+    padding: 12,
+    overflow: 'hidden',
   },
-  widgetSmallDay: { fontSize: 36, fontWeight: '700', color: Colors.primary, lineHeight: 40 },
-  widgetSmallLunar: { fontSize: 13, color: Colors.text, fontWeight: '500' },
-  widgetSmallGanzhi: { fontSize: 10, color: Colors.textSecondary, marginTop: 2 },
+  widgetSmallDay: { fontSize: 36, fontWeight: '700', lineHeight: 40 },
+  widgetSmallLunar: { fontSize: 13, fontWeight: '500', textAlign: 'center' },
+  widgetSmallGanzhi: { fontSize: 10, marginTop: 2, textAlign: 'center' },
+  widgetSmallFestival: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
   widgetMedium: {
     width: 270,
     height: 130,
-    backgroundColor: Colors.surfaceElevated,
     borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    gap: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    paddingHorizontal: 16,
+    overflow: 'hidden',
   },
-  widgetMediumLeft: { alignItems: 'center', minWidth: 60 },
-  widgetMedDay: { fontSize: 48, fontWeight: '700', color: Colors.primary, lineHeight: 52 },
-  widgetMedMonth: { fontSize: 13, color: Colors.textSecondary, fontWeight: '600' },
-  widgetMediumRight: { flex: 1, gap: 2 },
-  widgetMedLunarDay: { fontSize: 16, color: Colors.text, fontWeight: '600' },
-  widgetMedGanzhi: { fontSize: 12, color: Colors.textSecondary },
-  widgetMedZodiac: { fontSize: 12, color: Colors.textMuted },
+  widgetMediumLeft: { alignItems: 'center', width: 80 },
+  widgetMedDay: { fontSize: 52, fontWeight: '700', lineHeight: 56 },
+  widgetMedMonth: { fontSize: 13, fontWeight: '600' },
+  widgetMedYear: { fontSize: 11 },
+  widgetMedDivider: { width: 1, height: 70, marginHorizontal: 4 },
+  widgetMediumRight: { flex: 1, paddingLeft: 12, gap: 2 },
+  widgetMedLunarDay: { fontSize: 16, fontWeight: '600' },
+  widgetMedGanzhi: { fontSize: 12 },
+  widgetMedZodiac: { fontSize: 12 },
   widgetMedFestival: {
     fontSize: 11,
-    color: Colors.primary,
     fontWeight: '600',
-    marginTop: 4,
-    backgroundColor: Colors.surfaceElevated,
+    marginTop: 2,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    paddingVertical: 3,
+    borderRadius: 10,
+    overflow: 'hidden',
     alignSelf: 'flex-start',
   },
   section: {
