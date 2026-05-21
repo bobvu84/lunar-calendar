@@ -13,6 +13,17 @@ A React Native (Expo) app displaying the Vietnamese Lunar Calendar alongside the
 
 ---
 
+## App & Store IDs
+
+| Platform | ID |
+|----------|----|
+| Android package | `com.bobvu84.lunar.calendar` |
+| iOS bundle ID | `com.bobvu84.lunar.calendar` |
+| iOS App Group | `group.com.lunar.calendar.widget` |
+| iOS device UDID | `00008140-001448123AC0801C` |
+
+---
+
 ## Tech Stack
 
 | Layer | Choice |
@@ -31,12 +42,12 @@ A React Native (Expo) app displaying the Vietnamese Lunar Calendar alongside the
 ```
 lunar-calendar/
 ├── app/
-│   ├── _layout.tsx              # Root layout; triggers widget sync on activation
+│   ├── _layout.tsx              # Root layout; wraps ThemeProvider, triggers widget sync
 │   └── (tabs)/
 │       ├── _layout.tsx          # Tab bar: Lịch / Hôm Nay / Widget
 │       ├── index.tsx            # Calendar screen (month grid)
 │       ├── today.tsx            # Today detail screen (hero card)
-│       └── widget.tsx           # Widget preview + setup guide
+│       └── widget.tsx           # Widget preview + theme toggle + setup guide
 │
 ├── components/
 │   ├── CalendarGrid.tsx         # Month grid; builds rows of DayCell
@@ -45,6 +56,9 @@ lunar-calendar/
 │   ├── MonthNavigator.tsx       # Prev/next month + Can Chi badge
 │   └── DayDetailModal.tsx       # Slide-up modal with full date info
 │
+├── contexts/
+│   └── ThemeContext.tsx          # Dark/light theme provider + useTheme() hook
+│
 ├── utils/
 │   └── lunar.ts                 # ALL lunar logic + Vietnamese translation layer
 │
@@ -52,28 +66,30 @@ lunar-calendar/
 │   └── useWidgetSync.ts         # Syncs today's lunar data to native widget storage
 │
 ├── constants/
-│   └── theme.ts                 # Colours, typography, spacing
+│   └── theme.ts                 # DarkColors, LightColors, AppColors type, Spacing
 │
 ├── types/
 │   └── lunar-javascript.d.ts    # TypeScript declarations for lunar-javascript
 │
 ├── modules/widget-sync/
-│   ├── index.ts                 # JS API: syncWidgetData(), reloadWidget()
+│   ├── index.ts                 # JS API: syncWidgetData(), syncWidgetTheme(), reloadWidget()
 │   ├── ios/
-│   │   ├── WidgetSyncModule.swift   # Writes to App Group UserDefaults
-│   │   └── WidgetSyncModule.m       # Objective-C bridge header
+│   │   ├── WidgetSyncModule.swift   # Writes to App Group UserDefaults + reloadAllTimelines
+│   │   └── WidgetSyncModule.m       # Objective-C bridge header (declares all 3 methods)
 │   └── android/
-│       └── WidgetSyncModule.kt      # Writes to SharedPreferences + triggers update
+│       ├── WidgetSyncModule.kt      # Writes to SharedPreferences + triggers widget update
+│       └── WidgetSyncPackage.kt     # ReactPackage registration
 │
 ├── ios-widget/
-│   ├── LunarCalendarWidget.swift    # WidgetKit extension (Small + Medium views)
+│   ├── LunarCalendarWidget.swift    # WidgetKit extension (Small + Medium views, dark+light themes)
 │   └── Info.plist
 │
 ├── android-widget/
 │   ├── LunarCalendarWidgetProvider.kt
 │   └── res/
 │       ├── layout/lunar_calendar_widget.xml
-│       ├── drawable/widget_background.xml
+│       ├── drawable/widget_background.xml        # Dark: navy gradient
+│       ├── drawable/widget_background_light.xml  # Light: red gradient
 │       ├── drawable/festival_badge_bg.xml
 │       └── xml/lunar_calendar_widget_info.xml
 │
@@ -84,6 +100,85 @@ lunar-calendar/
 ├── package.json
 ├── tsconfig.json
 └── babel.config.js
+```
+
+---
+
+## Theme System
+
+### `constants/theme.ts`
+Exports `DarkColors`, `LightColors`, and `AppColors` type:
+- **DarkColors**: navy/gold — background `#0a0f1e`, surface `#131b2e`, surfaceElevated `#1a2744`, primary `#f5c842`, text `#ffffff`
+- **LightColors**: red/white — background `#FDFCFB`, surface `#FFFFFF`, surfaceElevated `#FEF9F9`, primary `#C0392B`, text `#1A1A2E`
+
+### `contexts/ThemeContext.tsx`
+- Persists theme to AsyncStorage under key `app_theme`
+- On toggle, writes new theme to native widget storage via `syncWidgetTheme(theme)`
+- Exports `useTheme()` → `{ theme, Colors, isDark, toggleTheme }`
+
+### Component pattern
+All components use `makeStyles` factory + `useMemo`:
+```typescript
+const makeStyles = (Colors: AppColors) => StyleSheet.create({ ... });
+// inside component:
+const { Colors } = useTheme();
+const styles = useMemo(() => makeStyles(Colors), [Colors]);
+```
+
+---
+
+## Widget Theme
+
+### Native widget color constants (do NOT use app `Colors` for widget preview)
+
+| Token | Dark | Light |
+|-------|------|-------|
+| Background | `#111d36` (navy mid) | `#ab3127` (red mid) |
+| Day color | `#f5c842` | `#ffffff` |
+| Lunar text | `rgba(255,255,255,0.9)` | `rgba(255,255,255,0.9)` |
+| GanZhi text | `rgba(255,255,255,0.55)` | `rgba(255,255,255,0.65)` |
+| Festival text | `#f5c842` | `#F39C12` |
+| Festival bg | `rgba(245,200,66,0.15)` | `rgba(255,255,255,0.15)` |
+| Divider | `rgba(245,200,66,0.25)` | `rgba(255,255,255,0.25)` |
+
+These are defined as `WIDGET_DARK` / `WIDGET_LIGHT` constants in `app/(tabs)/widget.tsx` and must exactly match `darkTheme`/`lightTheme` in `ios-widget/LunarCalendarWidget.swift` and colors in `android-widget/LunarCalendarWidgetProvider.kt`.
+
+### Theme sync flow
+1. User toggles Switch in Widget tab
+2. `toggleTheme()` in ThemeContext calls `syncWidgetTheme(theme)`
+3. iOS: writes `widgetTheme` to App Group UserDefaults + calls `WidgetCenter.shared.reloadAllTimelines()`
+4. Android: writes `widgetTheme` to `lunar_widget_prefs` SharedPreferences + broadcasts `APPWIDGET_UPDATE`
+
+---
+
+## Widget Data Flow
+
+### iOS (WidgetKit)
+- App writes to `UserDefaults` in App Group `group.com.lunar.calendar.widget`
+- Keys: `lunarData` (JSON), `widgetTheme` (`"dark"` | `"light"`)
+- Widget reads same container and refreshes timeline at midnight
+- Module: `modules/widget-sync/ios/WidgetSyncModule.swift`
+- Widget UI: `ios-widget/LunarCalendarWidget.swift`
+
+### Android (AppWidget)
+- App writes JSON to `SharedPreferences` (key `lunarData`, file `lunar_widget_prefs`)
+- Key `widgetTheme` also stored in same SharedPreferences
+- Widget reads on each broadcast
+- Module: `modules/widget-sync/android/WidgetSyncModule.kt`
+- Widget UI: `android-widget/LunarCalendarWidgetProvider.kt`
+
+### Data written by `useWidgetSync.ts`
+```json
+{
+  "solarDay": 1,
+  "solarMonth": 1,
+  "lunarDay": "Mùng 1",
+  "lunarMonth": "Tháng Giêng",
+  "ganZhiYear": "Giáp Thìn",
+  "zodiac": "Rồng",
+  "festival": "Tết Nguyên Đán",
+  "solarTerm": ""
+}
 ```
 
 ---
@@ -148,55 +243,13 @@ if (lunar.isFirstDayOfMonth) {
 
 ---
 
-## Widget Data Flow
-
-### iOS (WidgetKit)
-- App writes to `UserDefaults` in App Group `group.com.lunar.calendar.widget`
-- Widget reads same container and refreshes timeline at midnight
-- Module: `modules/widget-sync/ios/WidgetSyncModule.swift`
-- Widget UI: `ios-widget/LunarCalendarWidget.swift`
-
-### Android (AppWidget)
-- App writes JSON to `SharedPreferences` (key `lunarData`, file `lunar_widget_prefs`)
-- Widget reads on each broadcast
-- Module: `modules/widget-sync/android/WidgetSyncModule.kt`
-- Widget UI: `android-widget/LunarCalendarWidgetProvider.kt`
-
-### Data written by `useWidgetSync.ts`
-```json
-{
-  "solarDay": 1,
-  "lunarDay": "Mùng 1",
-  "lunarMonth": "Tháng Giêng",
-  "ganZhiYear": "Giáp Thìn",
-  "zodiac": "Rồng",
-  "festival": "Tết Nguyên Đán",
-  "solarTerm": ""
-}
-```
-
----
-
-## Vietnamese Localisation Rules
-
-- **Con giáp**: Vietnam uses **Mèo** (Cat) for the 4th zodiac, not Thỏ (Rabbit)
-- **Leap months**: prefix `Nhuận ` (long) or `Nh.` (short) before the month name
-- **Day 1**: show month name in cell instead of `Mùng 1`
-- **Day 15**: `Rằm`
-- **Days 1–10**: `Mùng 1` … `Mùng 10`
-- **Days 11–30**: plain numbers except Rằm
-- **Week header**: `CN T2 T3 T4 T5 T6 T7` (Chủ Nhật = Sunday)
-- **Festival fallback**: `translateFestivals` uses prefix-match so `"母亲节（五月第二个星期日）"` still maps to `Ngày của Mẹ`
-
----
-
 ## UI Screens
 
 | Screen | File | Key content |
 |--------|------|-------------|
 | Calendar | `app/(tabs)/index.tsx` | Month grid, month navigator, day detail modal |
 | Today | `app/(tabs)/today.tsx` | Hero card with full lunar info, week day in Vietnamese |
-| Widget preview | `app/(tabs)/widget.tsx` | Preview of iOS/Android widget + setup guide |
+| Widget preview | `app/(tabs)/widget.tsx` | Widget preview (exact native colors) + theme toggle + setup guide |
 
 ### `DayDetailModal.tsx`
 Shows on tap of any calendar cell. Displays:
@@ -219,10 +272,30 @@ npx expo start --web    # Web browser
 ```
 
 ### Native build (required for widgets)
+
+**iOS** — deploy to device:
 ```bash
-npx expo prebuild
-npx expo run:ios        # opens Xcode
-npx expo run:android    # opens Android Studio
+npx expo run:ios --device 00008140-001448123AC0801C --port 8082
+```
+
+**Android** — requires Java 17 and Android SDK:
+```bash
+JAVA_HOME=/opt/homebrew/opt/openjdk@17 \
+PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH" \
+ANDROID_HOME=/Users/hungvu/Library/Android/sdk \
+npx expo run:android
+```
+
+### After a clean Android prebuild
+`android/local.properties` is deleted by `--clean`. Always recreate it:
+```bash
+echo "sdk.dir=/Users/hungvu/Library/Android/sdk" > android/local.properties
+```
+
+### Changing package name / full native reset
+```bash
+npx expo prebuild --clean --platform android
+# then recreate local.properties, then expo run:android
 ```
 
 ---
@@ -234,4 +307,7 @@ npx expo run:android    # opens Android Studio
 - `solar.getOtherFestivals()` returns decorated strings (e.g. `"母亲节（五月第二个星期日）"`) — `translateFestivals` handles this with prefix matching
 - `npx expo install` (not `npm install`) should be used to add new packages to keep SDK 54 version alignment
 - Always use `--legacy-peer-deps` for plain `npm install`
-- The Expo config plugin (`plugins/withLunarWidget.js`) re-runs on every `expo prebuild` — edit the plugin, not the generated native files
+- The Expo config plugin (`plugins/withLunarWidget.js`) re-runs on every `expo prebuild` — **edit the plugin and source templates, not the generated native files**
+- Plugin always overwrites `ios/WidgetSyncModule.swift` and `ios/WidgetSyncModule.m` on prebuild (copy is unconditional, not skip-if-exists)
+- Widget preview in `widget.tsx` uses hardcoded `WIDGET_DARK`/`WIDGET_LIGHT` color constants — do NOT use app theme `Colors` for the preview widget background/text, as native widgets have their own fixed color scheme independent of the app theme
+- Changing the Android package name requires `expo prebuild --clean` to regenerate the native project; manual edits to `android/` source files alone are not enough because the autolinking Gradle task caches the old package name in binary files
