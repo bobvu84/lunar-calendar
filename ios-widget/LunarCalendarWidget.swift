@@ -75,8 +75,9 @@ struct LunarProvider: TimelineProvider {
 
 // MARK: - Colour helpers
 
-private let primaryRed = Color(red: 192/255, green: 57/255, blue: 43/255)
-private let goldColor  = Color(red: 243/255, green: 156/255, blue: 18/255)
+private let navyDeep    = Color(red: 10/255,  green: 15/255,  blue: 30/255)
+private let navySurface = Color(red: 26/255,  green: 39/255,  blue: 68/255)
+private let goldColor   = Color(red: 245/255, green: 200/255, blue: 66/255)
 
 // MARK: - Small Widget View  (155 × 155 pt)
 
@@ -86,14 +87,14 @@ struct SmallWidgetView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [primaryRed, Color(red: 0.5, green: 0.05, blue: 0.05)],
+                colors: [navySurface, navyDeep],
                 startPoint: .topLeading, endPoint: .bottomTrailing
             )
 
             VStack(spacing: 2) {
                 Text(String(format: "%02d/%02d", entry.lunarData.solarDay, entry.lunarData.solarMonth))
                     .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(goldColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
 
@@ -103,7 +104,7 @@ struct SmallWidgetView: View {
 
                 Text("Năm " + entry.lunarData.ganZhiYear + " · " + entry.lunarData.zodiac)
                     .font(.system(size: 10, weight: .regular))
-                    .foregroundColor(.white.opacity(0.65))
+                    .foregroundColor(.white.opacity(0.55))
                     .padding(.top, 2)
 
                 if !entry.lunarData.festival.isEmpty || !entry.lunarData.solarTerm.isEmpty {
@@ -115,7 +116,7 @@ struct SmallWidgetView: View {
                         .foregroundColor(goldColor)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(.white.opacity(0.15))
+                        .background(goldColor.opacity(0.15))
                         .clipShape(Capsule())
                         .padding(.top, 2)
                 }
@@ -135,7 +136,7 @@ struct MediumWidgetView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [primaryRed, Color(red: 0.5, green: 0.05, blue: 0.05)],
+                colors: [navySurface, navyDeep],
                 startPoint: .topLeading, endPoint: .bottomTrailing
             )
 
@@ -144,19 +145,19 @@ struct MediumWidgetView: View {
                 VStack(spacing: 0) {
                     Text("\(entry.lunarData.solarDay)")
                         .font(.system(size: 64, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(goldColor)
                     Text(months[max(0, entry.lunarData.solarMonth - 1)])
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white.opacity(0.75))
                     Text("\(entry.lunarData.solarYear)")
                         .font(.system(size: 11))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.white.opacity(0.45))
                 }
                 .frame(width: 110)
 
                 // Divider
                 Rectangle()
-                    .fill(.white.opacity(0.25))
+                    .fill(goldColor.opacity(0.25))
                     .frame(width: 1)
                     .padding(.vertical, 20)
 
@@ -168,11 +169,11 @@ struct MediumWidgetView: View {
 
                     Text("Năm " + entry.lunarData.ganZhiYear)
                         .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white.opacity(0.75))
 
                     Text(entry.lunarData.zodiac)
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.65))
+                        .foregroundColor(.white.opacity(0.55))
 
                     if !entry.lunarData.festival.isEmpty || !entry.lunarData.solarTerm.isEmpty {
                         let label = entry.lunarData.festival.isEmpty
@@ -183,7 +184,7 @@ struct MediumWidgetView: View {
                             .foregroundColor(goldColor)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(.white.opacity(0.15))
+                            .background(goldColor.opacity(0.15))
                             .clipShape(Capsule())
                     }
                 }
@@ -222,7 +223,7 @@ struct LunarCalendarWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: LunarProvider()) { entry in
             LunarCalendarWidgetEntryView(entry: entry)
-                .containerBackground(primaryRed, for: .widget)
+                .containerBackground(navyDeep, for: .widget)
         }
         .configurationDisplayName("Lunar Calendar")
         .description("Today's date in both Solar and Lunar calendars.")
