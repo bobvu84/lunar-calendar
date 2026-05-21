@@ -24,9 +24,10 @@
       }
     },
     "android": {
+      "icon": "./assets/icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1a0533"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0a0f1e"
       },
       "package": "com.lunar.calendar",
       "edgeToEdgeEnabled": true

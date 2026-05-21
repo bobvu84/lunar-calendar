@@ -101,17 +101,40 @@ function withAndroidWidget(config) {
         fs.copyFileSync(ktSrc, ktDst);
       }
 
-      // Copy WidgetSyncModule.kt
-      const syncSrc = path.join(projectRoot, 'modules', 'widget-sync', 'android', 'WidgetSyncModule.kt');
-      const syncDst = path.join(
-        androidDir,
-        'java',
-        ...ANDROID_PACKAGE.split('.'),
-        'WidgetSyncModule.kt'
-      );
-      if (fs.existsSync(syncSrc)) {
-        fs.mkdirSync(path.dirname(syncDst), { recursive: true });
-        fs.copyFileSync(syncSrc, syncDst);
+      // Copy WidgetSyncModule.kt + WidgetSyncPackage.kt
+      const androidModuleSrc = path.join(projectRoot, 'modules', 'widget-sync', 'android');
+      for (const file of ['WidgetSyncModule.kt', 'WidgetSyncPackage.kt']) {
+        const src = path.join(androidModuleSrc, file);
+        const dst = path.join(androidDir, 'java', ...ANDROID_PACKAGE.split('.'), file);
+        if (fs.existsSync(src)) {
+          fs.mkdirSync(path.dirname(dst), { recursive: true });
+          fs.copyFileSync(src, dst);
+        }
+      }
+
+      // Add widget_description string resource
+      const stringsPath = path.join(androidDir, 'res', 'values', 'strings.xml');
+      if (fs.existsSync(stringsPath)) {
+        let strings = fs.readFileSync(stringsPath, 'utf8');
+        if (!strings.includes('widget_description')) {
+          strings = strings.replace(
+            '</resources>',
+            '  <string name="widget_description">Lịch Âm Dương hôm nay</string>\n</resources>'
+          );
+          fs.writeFileSync(stringsPath, strings, 'utf8');
+        }
+      }
+
+      // Register WidgetSyncPackage in MainApplication.kt
+      const mainAppPath = path.join(androidDir, 'java', ...ANDROID_PACKAGE.split('.'), 'MainApplication.kt');
+      if (fs.existsSync(mainAppPath)) {
+        let content = fs.readFileSync(mainAppPath, 'utf8');
+        const placeholder = '// add(MyReactNativePackage())';
+        const replacement = '// add(MyReactNativePackage())\n              add(WidgetSyncPackage())';
+        if (!content.includes('WidgetSyncPackage()')) {
+          content = content.replace(placeholder, replacement);
+          fs.writeFileSync(mainAppPath, content, 'utf8');
+        }
       }
 
       // Copy res files
