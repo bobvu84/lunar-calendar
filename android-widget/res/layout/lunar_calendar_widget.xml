@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:text="1"
         android:textColor="#f5c842"
-        android:textSize="52sp"
+        android:textSize="40sp"
         android:textStyle="bold"
         android:fontFamily="sans-serif-condensed"
         android:lineSpacingExtra="-4dp" />

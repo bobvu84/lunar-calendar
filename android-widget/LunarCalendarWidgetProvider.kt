@@ -41,7 +41,10 @@ class LunarCalendarWidgetProvider : AppWidgetProvider() {
         if (json != null) {
             try {
                 val obj = JSONObject(json)
-                solarDay = obj.optInt("solarDay", Calendar.getInstance().get(Calendar.DAY_OF_MONTH)).toString()
+                val now = Calendar.getInstance()
+                val day = obj.optInt("solarDay", now.get(Calendar.DAY_OF_MONTH))
+                val month = obj.optInt("solarMonth", now.get(Calendar.MONTH) + 1)
+                solarDay = String.format("%02d/%02d", day, month)
                 val lunarMonth = obj.optString("lunarMonth", "")
                 val lunarDay = obj.optString("lunarDay", "")
                 lunarFull = "$lunarDay $lunarMonth"
@@ -59,7 +62,8 @@ class LunarCalendarWidgetProvider : AppWidgetProvider() {
                 return
             }
         } else {
-            solarDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH).toString()
+            val now = Calendar.getInstance()
+            solarDay = String.format("%02d/%02d", now.get(Calendar.DAY_OF_MONTH), now.get(Calendar.MONTH) + 1)
             lunarFull = ""
             ganZhiZodiac = ""
             festival = ""
