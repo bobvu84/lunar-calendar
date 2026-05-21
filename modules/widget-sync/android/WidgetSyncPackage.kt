@@ -1,4 +1,4 @@
-package com.lunar.calendar
+package com.bobvu84.lunar.calendar
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

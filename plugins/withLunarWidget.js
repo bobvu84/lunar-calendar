@@ -10,9 +10,9 @@ const { withXcodeProject, withEntitlementsPlist, withAndroidManifest, withDanger
 const path = require('path');
 const fs = require('fs');
 
-const APP_GROUP = 'group.com.lunar.calendar.widget';
+const APP_GROUP = 'group.com.bobvu84.lunar.calendar.widget';
 const WIDGET_TARGET = 'LunarCalendarWidget';
-const ANDROID_PACKAGE = 'com.lunar.calendar';
+const ANDROID_PACKAGE = 'com.bobvu84.lunar.calendar';
 
 // ─── iOS ──────────────────────────────────────────────────────────────────────
 
@@ -65,7 +65,7 @@ function withIOSWidgetExtension(config) {
     // Add widget extension target to the Xcode project
     const targets = project.pbxTargetByName(WIDGET_TARGET);
     if (!targets) {
-      const bundleId = mod.ios?.bundleIdentifier ?? 'com.lunar.calendar';
+      const bundleId = mod.ios?.bundleIdentifier ?? 'com.bobvu84.lunar.calendar';
       project.addTarget(
         WIDGET_TARGET,
         'app_extension',

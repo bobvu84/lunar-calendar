@@ -17,10 +17,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.bobvu84.lunar.calendar",
       "infoPlist": {
-        "NSAppGroupsEntitlements": ["group.com.lunar.calendar.widget"]
+        "NSAppGroupsEntitlements": ["group.com.bobvu84.lunar.calendar.widget"]
       },
       "entitlements": {
-        "com.apple.security.application-groups": ["group.com.lunar.calendar.widget"]
+        "com.apple.security.application-groups": ["group.com.bobvu84.lunar.calendar.widget"]
       }
     },
     "android": {
@@ -29,7 +29,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#0a0f1e"
       },
-      "package": "com.lunar.calendar",
+      "package": "com.bobvu84.lunar.calendar",
       "edgeToEdgeEnabled": true
     },
     "plugins": [

@@ -1,4 +1,4 @@
-package com.lunar.calendar
+package com.bobvu84.lunar.calendar
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
